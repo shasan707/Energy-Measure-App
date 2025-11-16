@@ -4,183 +4,789 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>How to Use — Tuya Energy Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <title>User Guide — Tuya Energy Dashboard</title>
+
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Bootstrap Icons (optional but nice) -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+  />
+
   <style>
+    :root {
+      --bg-main: #050816;
+      --bg-card: #0f172a;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.1);
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: rgba(148, 163, 184, 0.4);
+    }
+
+    * {
+      scroll-behavior: smooth;
+    }
+
     body {
-      background-color: #121212;
-      color: #e0e0e0;
-      font-family: 'Segoe UI', sans-serif;
-      line-height: 1.6;
-      padding: 2rem;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 55%, #000 100%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.7;
     }
 
-    h1,
-    h2 {
-      color: #ffffff;
-      border-left: 5px solid #00bcd4;
-      padding-left: 10px;
+    .guide-container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 3.5rem;
+    }
+
+    .guide-header {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.14), rgba(59, 130, 246, 0.16));
+      border-radius: 1.5rem;
+      padding: 2rem 1.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      box-shadow:
+        0 24px 60px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .guide-header::before {
+      content: '';
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 0 0, rgba(96, 165, 250, 0.18), transparent 55%),
+        radial-gradient(circle at 100% 0, rgba(74, 222, 128, 0.18), transparent 55%);
+      mix-blend-mode: screen;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .guide-header-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.7);
+      border-radius: 999px;
+      padding: 0.25rem 0.8rem;
+      margin-bottom: 0.6rem;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      backdrop-filter: blur(10px);
+    }
+
+    .eyebrow-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.35);
+    }
+
+    h1 {
+      font-size: clamp(1.9rem, 3vw, 2.35rem);
+      margin-bottom: 0.5rem;
+    }
+
+    .guide-subtitle {
+      max-width: 40rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.35rem;
+    }
+
+    .btn-primary-ghost,
+    .btn-outline-minimal {
+      border-radius: 999px;
+      padding: 0.55rem 1.2rem;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      border-width: 1px;
+      border-style: solid;
+      transition: all 0.18s ease-out;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-primary-ghost {
+      border-color: rgba(34, 197, 94, 0.7);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-main);
+      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.7);
+    }
+
+    .btn-primary-ghost:hover {
+      background: rgba(22, 163, 74, 0.22);
+      transform: translateY(-1px);
+      box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(22, 163, 74, 0.4);
+    }
+
+    .btn-outline-minimal {
+      border-color: rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--text-muted);
+    }
+
+    .btn-outline-minimal:hover {
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-main);
+    }
+
+    .quick-links {
+      margin-top: 1.4rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .quick-links a {
+      color: inherit;
+      text-decoration: none;
+      border-radius: 999px;
+      border: 1px dashed rgba(148, 163, 184, 0.6);
+      padding: 0.25rem 0.8rem;
+      background: rgba(15, 23, 42, 0.6);
+      transition: all 0.18s ease-out;
+    }
+
+    .quick-links a:hover {
+      border-style: solid;
+      border-color: rgba(34, 197, 94, 0.7);
+      color: #e5e7eb;
+      background: rgba(22, 101, 52, 0.35);
+    }
+
+    /* Layout sections */
+
+    h2.section-title {
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+
+    h2.section-title span.badge-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+    }
+
+    .section-kicker {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.9rem;
+    }
+
+    .guide-section {
       margin-top: 2rem;
     }
 
-    ul,
-    ol {
-      margin-left: 1.5rem;
+    .card-ghost {
+      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.9), #020617);
+      border-radius: 1.1rem;
+      border: 1px solid var(--border-subtle);
+      padding: 1.2rem 1rem;
+      box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 0.7);
     }
 
-    img {
-      max-width: 100%;
-      border: 2px solid #333;
-      border-radius: 6px;
-      margin: 1rem 0;
-      box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
-      animation: fadein 1.5s ease-in-out;
+    .card-ghost + .card-ghost {
+      margin-top: 1.25rem;
     }
 
-    .btn-download {
-      background: #00bcd4;
-      color: #000;
-      font-weight: bold;
-      border: none;
-      border-radius: 6px;
-      padding: 0.6rem 1.2rem;
-      margin-top: 2rem;
-      transition: all 0.3s ease-in-out;
+    .card-ghost h3 {
+      font-size: 1.02rem;
+      margin-bottom: 0.5rem;
     }
 
-    .btn-download:hover {
-      background: #00acc1;
-      transform: scale(1.05);
+    .card-ghost p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
     }
 
-    .section {
-      animation: slidein 1s ease;
+    .key-list {
+      padding-left: 1.1rem;
+      font-size: 0.9rem;
+      margin-bottom: 0;
     }
 
-    @keyframes slidein {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
+    .key-list li + li {
+      margin-top: 0.25rem;
+    }
+
+    .pill-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: var(--text-muted);
+      margin-bottom: 0.45rem;
+    }
+
+    .pill-label i {
+      font-size: 0.9rem;
+    }
+
+    /* Images */
+
+    .guide-img {
+      width: 100%;
+      border-radius: 0.9rem;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      margin-top: 0.75rem;
+      box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(15, 23, 42, 0.8);
+      transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    }
+
+    .guide-img:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow:
+        0 26px 70px rgba(15, 23, 42, 1),
+        0 0 0 1px rgba(34, 197, 94, 0.45);
+    }
+
+    /* Two-column for desktop */
+
+    @media (min-width: 992px) {
+      .split-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.1fr);
+        gap: 1.5rem;
+        align-items: flex-start;
+      }
+    }
+
+    /* Small utilities */
+
+    .inline-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+        monospace;
+      font-size: 0.8rem;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 0.18rem 0.4rem;
+      border-radius: 0.4rem;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: #e5e7eb;
+    }
+
+    .hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+    }
+
+    .support-box {
+      border-radius: 0.9rem;
+      border: 1px dashed rgba(148, 163, 184, 0.7);
+      padding: 0.85rem 0.9rem;
+      font-size: 0.86rem;
+      background: rgba(15, 23, 42, 0.75);
+    }
+
+    .support-box a {
+      color: #a5b4fc;
+      text-decoration: none;
+    }
+
+    .support-box a:hover {
+      text-decoration: underline;
+    }
+
+    .section-divider {
+      margin-top: 2.2rem;
+      margin-bottom: 1.2rem;
+      border-top: 1px dashed rgba(148, 163, 184, 0.45);
+    }
+
+    footer {
+      margin-top: 3rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Mobile tweaks */
+
+    @media (max-width: 575.98px) {
+      .guide-header {
+        padding: 1.7rem 1.2rem;
       }
 
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadein {
-      from {
-        opacity: 0;
+      .guide-container {
+        padding-inline: 1rem;
       }
 
-      to {
-        opacity: 1;
-      }
-    }
-
-    @media (max-width: 767px) {
-      .container {
-        padding: 1rem;
+      .header-actions {
+        flex-direction: column;
+        align-items: flex-start;
       }
 
-      .btn-download {
+      .btn-primary-ghost,
+      .btn-outline-minimal {
         width: 100%;
-      }
-
-      img {
-        width: 100%;
+        justify-content: center;
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <h1>How to Use the Tuya Energy Dashboard</h1>
-    <p>This site helps monitor, visualize, and control your IoT-based smart socket with real-time and historical energy profiling.</p>
-    <button class="btn-download" onclick="window.print()">📄 Download as PDF</button>
+  <main class="guide-container">
+    <!-- HERO / INTRO -->
+    <header class="guide-header mb-4" id="top">
+      <div class="guide-header-inner">
+        <div class="eyebrow">
+          <span class="eyebrow-dot"></span>
+          <span>Tuya Smart Socket • Energy View</span>
+        </div>
+        <h1 class="mb-1">Tuya Energy Dashboard — User Walkthrough</h1>
+        <p class="guide-subtitle">
+          Use this page as a quick companion while you explore the dashboard. You’ll learn how to switch modes,
+          read the metrics, and export the data you care about.
+        </p>
 
-    <div class="section">
-      <h2>1. Overview</h2>
-      <p>View live power readings, control the device state (ON/OFF), and analyze historical data by day or custom range.</p>
-      <img src="{{ url_for('static', filename='dashboard_overview.png') }}" alt="Dashboard Overview Image" />
-    </div>
+        <div class="header-actions">
+          <button class="btn-primary-ghost" type="button" onclick="window.print()">
+            <i class="bi bi-file-earmark-arrow-down"></i>
+            Save this guide as PDF
+          </button>
+          <a href="#modes" class="btn-outline-minimal">
+            <i class="bi bi-lightning-charge"></i>
+            Skip to dashboard controls
+          </a>
+        </div>
 
-    <div class="section">
-      <h2>2. Navigation & Controls</h2>
-      <ul>
-        <li><b>Mode:</b> Switch between Live, Load Day, Load Range.</li>
-        <li><b>Date Picker:</b> Available for Load Day and Load Range.</li>
-        <li><b>Apply:</b> Fetch and update data for selected time window.</li>
-        <li><b>Download CSV:</b> Export stored readings.</li>
-        <li><b>How to Use:</b> Opens this page.</li>
-      </ul>
-      <img src="{{ url_for('static', filename='mode_select.png') }}" alt="Mode Selection UI" />
-    </div>
+        <div class="quick-links">
+          <span>Jump to:</span>
+          <a href="#live-mode">Live view</a>
+          <a href="#load-day">Single-day insights</a>
+          <a href="#range-mode">Custom range</a>
+          <a href="#charts">Graphs</a>
+          <a href="#export">CSV export</a>
+          <a href="#troubleshoot">Issues & fixes</a>
+        </div>
+      </div>
+    </header>
 
-    <div class="section">
-      <h2>3. Live Mode</h2>
-      <ul>
-        <li><b>Toggle Power:</b> Click ON/OFF buttons to control the socket.</li>
-        <li><b>Status:</b> Shows if socket is ON or OFF in real time.</li>
-        <li><b>Live Readings:</b> Power (W), Voltage (V), Current (A) update every 5s.</li>
-        <li><b>Today’s Energy:</b> Displays total kWh and cost.</li>
-      </ul>
-      <img src="{{ url_for('static', filename='live_mode.png') }}" alt="Live Mode Screenshot" />
-    </div>
+    <!-- 1. WHAT YOU SEE FIRST -->
+    <section class="guide-section" id="overview">
+      <h2 class="section-title">
+        <span>01. First look</span>
+        <span class="badge-label">Dashboard overview</span>
+      </h2>
+      <p class="section-kicker">
+        When you open the app, you land on a single page that combines control buttons, key power stats, and charts.
+        Think of it as the “command center” for your smart socket.
+      </p>
 
-    <div class="section">
-      <h2>4. Load Day Mode</h2>
-      <ol>
-        <li>Select <i>Load Day</i> from the mode dropdown.</li>
-        <li>Pick a specific date.</li>
-        <li>Click <b>Apply</b>.</li>
-        <li>Top of chart shows total kWh and estimated cost.</li>
-        <li>Charts show historical values of W, V, A.</li>
-      </ol>
-      <img src="{{ url_for('static', filename='load_day.png') }}" alt="Load Day Screenshot" />
-    </div>
+      <div class="split-layout">
+        <div class="card-ghost">
+          <h3>Main things on the screen</h3>
+          <ul class="key-list">
+            <li><strong>Mode selector</strong> — choose what kind of data you want to see (Live, Day, or Range).</li>
+            <li><strong>Time filters</strong> — pick a date or start/end date-time (for history views).</li>
+            <li><strong>Action buttons</strong> — <span class="inline-code">Apply</span>, <span class="inline-code">Download CSV</span>, and the
+              help link to this guide.</li>
+            <li><strong>Status & numbers</strong> — ON/OFF state, power (W), voltage (V), current (A), and today’s
+              energy/cost.</li>
+            <li><strong>Charts</strong> — visual trends for W, V, A, and energy over time.</li>
+          </ul>
+          <p class="hint">
+            Tip: If you’re just checking if the socket is working, stay in <strong>Live</strong> mode.
+          </p>
+        </div>
 
-    <div class="section">
-      <h2>5. Load Range Mode</h2>
-      <ol>
-        <li>Select <i>Load Range</i>.</li>
-        <li>Specify start and end date-times.</li>
-        <li>Click <b>Apply</b>.</li>
-        <li>Top of chart shows total kWh and estimated cost.</li>
-        <li>Graphs show values across the interval.</li>
-      </ol>
-      <img src="{{ url_for('static', filename='load_range.png') }}" alt="Load Range Screenshot" />
-    </div>
+        <div>
+          <img
+            src="{{ url_for('static', filename='dashboard_overview.png') }}"
+            alt="Full dashboard overview"
+            class="guide-img"
+          />
+        </div>
+      </div>
+    </section>
 
-    <div class="section">
-      <h2>6. Charts Explanation</h2>
-      <ul>
-        <li><b>Line Charts:</b> Used for Load Day and Range; X = time, Y = measurement.</li>
-        <li><b>Bar Chart:</b> In Live mode, shows hourly energy profile.</li>
-        <li>Hover over points for exact values.</li>
-      </ul>
-      <img src="{{ url_for('static', filename='chart_example.png') }}" alt="Chart Example" />
-    </div>
+    <hr class="section-divider" />
 
-    <div class="section">
-      <h2>7. Export Data</h2>
-      <p>Click the <b>Download CSV</b> button to export readings in the format:</p>
-      <code>ts,power,current,voltage,kwh</code>
-      <img src="{{ url_for('static', filename='download_csv.png') }}" alt="Download CSV Screenshot" />
-    </div>
+    <!-- 2. MODES & NAV -->
+    <section class="guide-section" id="modes">
+      <h2 class="section-title">
+        <span>02. Picking what you want to see</span>
+        <span class="badge-label">Modes & navigation</span>
+      </h2>
 
-    <div class="section">
-      <h2>8. Troubleshooting</h2>
-      <ul>
-        <li><b>Zero Readings:</b> Make sure your socket is connected and functional.</li>
-        <li><b>Cost not correct?</b> Email the admin : 2022-1-60-013@std.ewbubd.edu.</li>
-        <li><b>Device empty but not getting reading?</b> Sometimes it takes a while to load data, please be patient.</li>
-      </ul>
-      <img src="{{ url_for('static', filename='troubleshoot.png') }}" alt="Troubleshooting Section" />
-    </div>
-  </div>
+      <div class="split-layout">
+        <div>
+          <div class="card-ghost mb-3">
+            <span class="pill-label">
+              <i class="bi bi-sliders"></i>
+              Mode selector
+            </span>
+            <p class="mb-2">
+              Use the <strong>Mode</strong> dropdown to tell the dashboard <em>how</em> you want to view data:
+            </p>
+            <ul class="key-list">
+              <li><strong>Live</strong> — watch current usage and directly control the socket.</li>
+              <li><strong>Load Day</strong> — inspect everything that happened on a specific day.</li>
+              <li><strong>Load Range</strong> — zoom out and see a custom time window across days.</li>
+            </ul>
+          </div>
+
+          <div class="card-ghost">
+            <span class="pill-label">
+              <i class="bi bi-calendar2-week"></i>
+              Time & actions
+            </span>
+            <ul class="key-list mb-2">
+              <li>
+                <strong>Date picker</strong> — available in <strong>Load Day</strong> and <strong>Load Range</strong>.
+              </li>
+              <li>
+                <strong>Apply</strong> — after you pick a date or date range, press this to refresh the charts and
+                numbers.
+              </li>
+              <li>
+                <strong>Download CSV</strong> — export the stored records for deeper analysis in Excel, Python, etc.
+              </li>
+              <li>
+                <strong>Help / “How it works”</strong> — opens this guide in a new tab.
+              </li>
+            </ul>
+            <p class="hint">
+              If nothing changes after clicking <strong>Apply</strong>, double-check that the selected dates actually
+              have data.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <img
+            src="{{ url_for('static', filename='mode_select.png') }}"
+            alt="Mode and navigation controls"
+            class="guide-img"
+          />
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider" />
+
+    <!-- 3. LIVE MODE -->
+    <section class="guide-section" id="live-mode">
+      <h2 class="section-title">
+        <span>03. Live view</span>
+        <span class="badge-label">Real-time control</span>
+      </h2>
+
+      <div class="split-layout">
+        <div>
+          <div class="card-ghost">
+            <h3>Using Live mode</h3>
+            <ul class="key-list mb-2">
+              <li>
+                <strong>Turn the socket ON/OFF</strong> — use the dedicated buttons. The state label updates almost
+                immediately when the command succeeds.
+              </li>
+              <li>
+                <strong>Watch measurements update</strong> — power (W), voltage (V), and current (A) refresh roughly
+                every 5 seconds.
+              </li>
+              <li>
+                <strong>Today’s summary</strong> — see total energy used in kWh and its estimated cost since midnight.
+              </li>
+              <li>
+                <strong>Hourly bar view</strong> — a compact bar chart shows how energy use changes hour by hour.
+              </li>
+            </ul>
+            <p class="hint">
+              If values stay flat at zero while the device is definitely running, check the <strong>Troubleshooting</strong>
+              section below.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <img
+            src="{{ url_for('static', filename='live_mode.png') }}"
+            alt="Live mode interface"
+            class="guide-img"
+          />
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider" />
+
+    <!-- 4. LOAD DAY -->
+    <section class="guide-section" id="load-day">
+      <h2 class="section-title">
+        <span>04. Looking at a single day</span>
+        <span class="badge-label">Load Day mode</span>
+      </h2>
+
+      <div class="split-layout">
+        <div>
+          <img
+            src="{{ url_for('static', filename='load_day.png') }}"
+            alt="Load Day view"
+            class="guide-img mb-3"
+          />
+        </div>
+
+        <div>
+          <div class="card-ghost">
+            <h3>Steps to explore one day</h3>
+            <ol class="key-list mb-2">
+              <li>Choose <strong>Load Day</strong> from the Mode dropdown.</li>
+              <li>Pick the date you want to inspect.</li>
+              <li>Click <strong>Apply</strong> to load all samples for that day.</li>
+              <li>
+                Read the <strong>header summary</strong> above the chart — it reports total kWh and estimated cost for
+                that date.
+              </li>
+              <li>
+                Use the chart to see how <strong>W, V, and A</strong> changed throughout the day. Hover on points to
+                see exact values.
+              </li>
+            </ol>
+            <p class="hint">
+              Great for checking “which hour was most expensive?” or spotting unusual spikes on a specific date.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider" />
+
+    <!-- 5. LOAD RANGE -->
+    <section class="guide-section" id="range-mode">
+      <h2 class="section-title">
+        <span>05. Comparing multiple days</span>
+        <span class="badge-label">Load Range mode</span>
+      </h2>
+
+      <div class="split-layout">
+        <div>
+          <div class="card-ghost">
+            <h3>When to use Load Range</h3>
+            <p>
+              Use <strong>Load Range</strong> when you care about trends over multiple days (or a very specific
+              time window, like “yesterday 6 PM to today 6 AM”).
+            </p>
+            <ol class="key-list mb-2">
+              <li>Switch Mode to <strong>Load Range</strong>.</li>
+              <li>Select your <strong>start</strong> and <strong>end</strong> date-time fields.</li>
+              <li>Hit <strong>Apply</strong> to refresh the chart.</li>
+              <li>
+                At the top, check total <strong>kWh</strong> and approximate cost for the entire chosen interval.
+              </li>
+              <li>
+                Use the graphs to understand patterns — for example, weekend vs weekday usage or peak vs off-peak
+                hours.
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <div>
+          <img
+            src="{{ url_for('static', filename='load_range.png') }}"
+            alt="Custom range analytics"
+            class="guide-img"
+          />
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider" />
+
+    <!-- 6. CHARTS EXPLANATION -->
+    <section class="guide-section" id="charts">
+      <h2 class="section-title">
+        <span>06. Reading the graphs</span>
+        <span class="badge-label">Charts & metrics</span>
+      </h2>
+
+      <div class="split-layout">
+        <div>
+          <div class="card-ghost mb-3">
+            <h3>What the charts represent</h3>
+            <ul class="key-list mb-2">
+              <li>
+                In <strong>Load Day</strong> and <strong>Load Range</strong>, the dashboard uses
+                <strong>line charts</strong>: time on the X-axis, measurements on the Y-axis.
+              </li>
+              <li>
+                In <strong>Live</strong> mode, an <strong>hourly bar chart</strong> summarizes energy distribution
+                across the current day.
+              </li>
+              <li>
+                Hovering over a point or bar shows exact numbers for that timestamp.
+              </li>
+            </ul>
+          </div>
+
+          <div class="card-ghost">
+            <h3>Typical uses</h3>
+            <ul class="key-list mb-2">
+              <li>Spot <strong>voltage drops</strong> or unstable supply.</li>
+              <li>Identify periods with <strong>high current draw</strong>.</li>
+              <li>Estimate how much each appliance contributes to your bill.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div>
+          <img
+            src="{{ url_for('static', filename='chart_example.png') }}"
+            alt="Charts examples"
+            class="guide-img"
+          />
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider" />
+
+    <!-- 7. EXPORT -->
+    <section class="guide-section" id="export">
+      <h2 class="section-title">
+        <span>07. Taking your data with you</span>
+        <span class="badge-label">CSV export</span>
+      </h2>
+
+      <div class="split-layout">
+        <div>
+          <div class="card-ghost">
+            <h3>Exporting to CSV</h3>
+            <p>
+              Whenever you want to analyze the readings outside the dashboard, use the
+              <strong>Download CSV</strong> button. The exported file contains one row per reading.
+            </p>
+            <p class="mb-2">
+              The CSV columns follow this structure:
+              <br />
+              <span class="inline-code">ts,power,current,voltage,kwh</span>
+            </p>
+            <ul class="key-list">
+              <li><strong>ts</strong> — timestamp of the reading.</li>
+              <li><strong>power</strong> — instantaneous power in watts (W).</li>
+              <li><strong>current</strong> — current in amperes (A).</li>
+              <li><strong>voltage</strong> — voltage in volts (V).</li>
+              <li><strong>kwh</strong> — accumulated energy in kilowatt-hours.</li>
+            </ul>
+            <p class="hint">
+              You can open the CSV in Excel, Google Sheets, R, Python, or any tool that supports comma-separated
+              files.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <img
+            src="{{ url_for('static', filename='download_csv.png') }}"
+            alt="Download CSV button"
+            class="guide-img"
+          />
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider" />
+
+    <!-- 8. TROUBLESHOOTING -->
+    <section class="guide-section" id="troubleshoot">
+      <h2 class="section-title">
+        <span>08. If something feels off</span>
+        <span class="badge-label">Troubleshooting</span>
+      </h2>
+
+      <div class="split-layout">
+        <div>
+          <img
+            src="{{ url_for('static', filename='troubleshoot.png') }}"
+            alt="Troubleshooting hints"
+            class="guide-img mb-3"
+          />
+        </div>
+
+        <div>
+          <div class="card-ghost mb-3">
+            <h3>Common situations</h3>
+            <ul class="key-list">
+              <li>
+                <strong>All readings are zero</strong>  
+                — confirm the smart socket is powered, connected to the internet, and properly paired with Tuya.
+              </li>
+              <li>
+                <strong>Numbers don’t match your bill</strong>  
+                — the estimated cost uses a fixed energy tariff. If your local rate is different, the dashboard
+                total will not exactly match your actual bill.
+              </li>
+              <li>
+                <strong>Device appears selected but no history is loading</strong>  
+                — give it a moment, then try a shorter date range and click <strong>Apply</strong> again.
+              </li>
+            </ul>
+          </div>
+
+          <div class="support-box">
+            Still confused about a value or the cost estimate?<br />
+            Reach out to the admin at
+            <a href="mailto:2022-1-60-013@std.ewubd.edu">2022-1-60-013@std.ewubd.edu</a>
+            with a short description and (if possible) a screenshot.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Need to get back to the top? <a href="#top" style="color:#a5b4fc; text-decoration:none;">Return to
+        “First look”</a>.
+    </footer>
+  </main>
+
+  <!-- Bootstrap JS (optional, if not already included elsewhere) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
