@@ -4,3 +4,4 @@ apscheduler
 pandas
 python-dateutil
 gunicorn
+jinja2
