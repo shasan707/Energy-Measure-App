@@ -5,3 +5,4 @@ pandas
 python-dateutil
 gunicorn
 jinja2
+Flask Jinja2
