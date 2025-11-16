@@ -63,7 +63,7 @@ def dashboard():
 
 @app.route("/manual")
 def manual():
-    return render_template("manual.html")
+    return render_template("Manual.html")
 
 @app.route("/status")
 def api_status():
