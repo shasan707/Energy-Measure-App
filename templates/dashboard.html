@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>⚡ Tuya Energy Dashboard</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background: #121212;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+    .card {
+      background: #1e1e1e;
+      padding: 2rem;
+      max-width: 700px;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    h1, h2, h6, .reading, p {
+      color: #fff !important;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      align-items: center;
+      margin-bottom:1.5rem;
+    }
+    .controls > * {
+      flex: 1;
+      min-width: 120px;
+    }
+    input, select {
+      background: #fff !important;
+      color: #000 !important;
+      border-radius: .25rem;
+      border: 1px solid #444;
+    }
+    .btn, button, a.btn {
+      color: #fff !important;
+    }
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 50%;
+      margin-bottom: 1rem;
+    }
+    .chart-wrapper canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .badge {
+      font-size: .9rem;
+    }
+    /* Cat image styling */
+    .cat-img {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      width: 120px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.6);
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="card text-center">
+    <h1>⚡ Tuya Energy Dashboard</h1>
+    <div class="controls">
+      <select id="modeSelect" class="form-select">
+        <option value="live" selected>Live</option>
+        <option value="day">Load Day</option>
+        <option value="range">Load Range</option>
+      </select>
+      <input type="date" id="histDate" class="form-control"/>
+      <input type="datetime-local" id="startDateTime" class="form-control"/>
+      <input type="datetime-local" id="endDateTime" class="form-control"/>
+      <button id="btn-apply" class="btn btn-secondary">Apply</button>
+      <a href="/download" class="btn btn-outline-light">Download CSV</a>
+      <a href="/manual" class="btn btn-outline-info">How to Use</a>
+    </div>
+    <!-- LIVE READINGS -->
+    <div id="liveSection" class="mt-4">
+      <p class="reading">Socket is currently:
+        <span id="statusBadge" class="badge bg-secondary">--</span>
+      </p>
+      <p class="reading">Power: <strong><span id="powerVal">--</span></strong> W</p>
+      <p class="reading">Current: <strong><span id="currentVal">--</span></strong> A</p>
+      <p class="reading">Voltage: <strong><span id="voltageVal">--</span></strong> V</p>
+      <div class="mt-3">
+        <button id="btn-on" class="btn btn-success btn-lg me-2">Turn ON</button>
+        <button id="btn-off" class="btn btn-danger btn-lg">Turn OFF</button>
+      </div>
+    </div>
+    <!-- PERIOD SUMMARY (for Day/Range) -->
+    <div id="periodSummary" class="mt-4" style="display:none;">
+      <div class="d-flex justify-content-between my-4">
+        <div class="p-3 bg-dark rounded text-center flex-fill me-2 border border-secondary">
+          <h6 class="text-white">Total kWh</h6>
+          <p id="periodKwh" class="display-6 text-white">--</p>
+        </div>
+        <div class="p-3 bg-dark rounded text-center flex-fill border border-secondary">
+          <h6 class="text-white">Est. Cost (BDT)</h6>
+          <p id="periodCost" class="display-6 text-white">--</p>
+        </div>
+      </div>
+    </div>
+    <!-- CHARTS -->
+    <div class="mt-4">
+      <h2 class="h5 text-white">Power (W)</h2>
+      <div class="chart-wrapper"><canvas id="powerChart"></canvas></div>
+      <h2 class="h5 text-white">Current (A)</h2>
+      <div class="chart-wrapper"><canvas id="currentChart"></canvas></div>
+      <h2 class="h5 text-white">Voltage (V)</h2>
+      <div class="chart-wrapper"><canvas id="voltageChart"></canvas></div>
+    </div>
+    <!-- LIVE SUMMARY (for Live) -->
+    <div id="liveSummary" class="mt-4">
+      <div class="d-flex justify-content-between my-4">
+        <div class="p-3 bg-dark rounded text-center flex-fill me-2 border border-secondary">
+          <h6 class="text-white">Today kWh</h6>
+          <p id="todayKwh" class="display-6 text-white">--</p>
+        </div>
+        <div class="p-3 bg-dark rounded text-center flex-fill border border-secondary">
+          <h6 class="text-white">Cost (BDT)</h6>
+          <p id="todayCost" class="display-6 text-white">--</p>
+        </div>
+      </div>
+      <h2 class="h5 text-white">Last 24 h kWh by Hour</h2>
+      <div class="chart-wrapper"><canvas id="hourlyChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Cat image -->
+  <img src="{{ url_for('static', filename='cat.png') }}" alt="Cat" class="cat-img"/>
+
+  <script>
+    const today = new Date().toISOString().slice(0,10);
+    const nowHM = new Date().toISOString().slice(11,16);
+    document.getElementById('histDate').value      = today;
+    document.getElementById('startDateTime').value = `${today}T00:00`;
+    document.getElementById('startDateTime').max   = `${today}T23:59`;
+    document.getElementById('endDateTime').value   = `${today}T${nowHM}`;
+    document.getElementById('endDateTime').max     = `${today}T23:59`;
+
+    const mode = document.getElementById('modeSelect');
+    const day  = document.getElementById('histDate');
+    const sIn  = document.getElementById('startDateTime');
+    const eIn  = document.getElementById('endDateTime');
+
+    function toggle() {
+      const liveSec = document.getElementById('liveSection');
+      const liveSum = document.getElementById('liveSummary');
+      const perSum  = document.getElementById('periodSummary');
+
+      if (mode.value === 'live') {
+        day.style.display = sIn.style.display = eIn.style.display = 'none';
+        liveSec.style.display = liveSum.style.display = '';
+        perSum.style.display = 'none';
+      } else {
+        day.style.display  = mode.value==='day' ? '' : 'none';
+        sIn.style.display  = eIn.style.display = mode.value==='range'? '' : 'none';
+        liveSec.style.display = liveSum.style.display = 'none';
+        perSum.style.display = 'none';
+      }
+    }
+    mode.onchange = toggle;
+    toggle();
+
+    const makeLine = (ctx,label) => new Chart(ctx,{
+      type:'line',
+      data:{ labels:[], datasets:[{ label, data:[], borderWidth:2, tension:0.3, pointRadius:0 }]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        scales:{ x:{ ticks:{ color:'#ccc' }}, y:{ ticks:{ color:'#ccc'}}},
+        plugins:{ legend:{ labels:{ color:'#ccc'}}}
+      }
+    });
+
+    const powerChart   = makeLine(document.getElementById('powerChart').getContext('2d'),'Power (W)');
+    const currentChart = makeLine(document.getElementById('currentChart').getContext('2d'),'Current (A)');
+    const voltageChart = makeLine(document.getElementById('voltageChart').getContext('2d'),'Voltage (V)');
+    const hourlyCtx    = document.getElementById('hourlyChart').getContext('2d');
+    let hourlyChart, liveInt;
+
+    async function fetchStatus(){
+      const s = await fetch('/status').then(r=>r.json());
+      const badge = document.getElementById('statusBadge');
+      badge.textContent = s.switch?'ON':'OFF';
+      badge.className   = 'badge ' + (s.switch?'bg-success':'bg-danger');
+      document.getElementById('powerVal').textContent   = s.power.toFixed(1);
+      document.getElementById('currentVal').textContent = s.current.toFixed(3);
+      document.getElementById('voltageVal').textContent = s.voltage.toFixed(1);
+      const t = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      [[powerChart,s.power],[currentChart,s.current],[voltageChart,s.voltage]]
+        .forEach(([ch,v])=>{
+          ch.data.labels.push(t);
+          ch.data.datasets[0].data.push(v);
+          if(ch.data.labels.length>60){
+            ch.data.labels.shift();
+            ch.data.datasets[0].data.shift();
+          }
+          ch.update();
+        });
+    }
+
+    async function loadSummary(){
+      const d = await fetch('/summary').then(r=>r.json());
+      document.getElementById('todayKwh').textContent  = d.kwh + ' kWh';
+      document.getElementById('todayCost').textContent = '৳ ' + d.cost;
+      if(hourlyChart) hourlyChart.destroy();
+      hourlyChart = new Chart(hourlyCtx,{
+        type:'bar',
+        data:{ labels:d.trend.map(x=>x.hour+':00'), datasets:[{ data:d.trend.map(x=>x.kwh), borderWidth:1 }]},
+        options:{ responsive:true, maintainAspectRatio:false,
+          scales:{ x:{ ticks:{ color:'#ccc'}}, y:{ beginAtZero:true, ticks:{ color:'#ccc'}}},
+          plugins:{ legend:{ display:false}}
+        }
+      });
+    }
+
+    async function plot(rows){
+      [powerChart,currentChart,voltageChart].forEach(ch=>{
+        ch.data.labels=[]; ch.data.datasets[0].data=[];
+      });
+      rows.forEach(r=>{
+        const t = r.ts.substr(11,5);
+        powerChart.data.labels.push(t);   powerChart.data.datasets[0].data.push(r.power);
+        currentChart.data.labels.push(t); currentChart.data.datasets[0].data.push(r.current);
+        voltageChart.data.labels.push(t); voltageChart.data.datasets[0].data.push(r.voltage);
+      });
+      powerChart.update(); currentChart.update(); voltageChart.update();
+    }
+
+    document.getElementById('btn-apply').onclick = async ()=>{
+      clearInterval(liveInt);
+      document.getElementById('periodSummary').style.display = 'none';
+      document.getElementById('liveSummary').style.display = 'none';
+
+      if(mode.value==='live'){
+        toggle();
+        await fetchStatus();
+        liveInt = setInterval(fetchStatus,60000);
+        await loadSummary();
+        toggle();
+      }
+      else if(mode.value==='day'){
+        toggle();
+        const rows = await fetch(`/history?date=${day.value}`).then(r=>r.json());
+        plot(rows);
+        const ps = await fetch(`/summary?date=${day.value}`).then(r=>r.json());
+        document.getElementById('periodKwh').textContent  = ps.kwh + ' kWh';
+        document.getElementById('periodCost').textContent = '৳ ' + ps.cost;
+        document.getElementById('periodSummary').style.display = '';
+      }
+      else {
+        toggle();
+        const start = `${sIn.value}:00`, end = `${eIn.value}:00`;
+        const rows = await fetch(`/history?start=${start}&end=${end}`).then(r=>r.json());
+        if(!rows.length) return alert('No data in that range');
+        plot(rows);
+        const ps = await fetch(`/summary?start=${start}&end=${end}`).then(r=>r.json());
+        document.getElementById('periodKwh').textContent  = ps.kwh + ' kWh';
+        document.getElementById('periodCost').textContent = '৳ ' + ps.cost;
+        document.getElementById('periodSummary').style.display = '';
+      }
+    };
+
+    document.getElementById('btn-on').onclick  = ()=>fetch('/on').then(fetchStatus);
+    document.getElementById('btn-off').onclick = ()=>fetch('/off').then(fetchStatus);
+
+    document.getElementById('btn-apply').click();
+  </script>
+</body>
+</html>

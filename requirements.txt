@@ -1,0 +1,6 @@
+Flask
+tinytuya
+apscheduler
+pandas
+python-dateutil
+gunicorn
