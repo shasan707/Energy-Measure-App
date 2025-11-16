@@ -5,282 +5,975 @@
   <title>⚡ Tuya Energy Dashboard</title>
   <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
+
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
+    :root {
+      --bg-page: #020617;
+      --bg-panel: #020617;
+      --bg-card: #0b1120;
+      --bg-chip: #0f172a;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.15);
+      --danger: #ef4444;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: rgba(148, 163, 184, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      background: #121212;
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
-      padding: 2rem;
+      margin: 0;
+      min-height: 100vh;
       display: flex;
+      align-items: stretch;
       justify-content: center;
+      background:
+        radial-gradient(circle at top, #1e293b 0, #020617 55%, #000 100%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 1.5rem;
     }
-    .card {
-      background: #1e1e1e;
-      padding: 2rem;
-      max-width: 700px;
+
+    .dashboard-shell {
       width: 100%;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      max-width: 1120px;
+      border-radius: 1.5rem;
+      background: radial-gradient(circle at top left, #020617, #020617 55%, #000 100%);
+      border: 1px solid rgba(15, 23, 42, 0.9);
+      box-shadow:
+        0 28px 80px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(15, 23, 42, 0.7);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.5fr);
     }
-    h1, h2, h6, .reading, p {
-      color: #fff !important;
-    }
-    .controls {
+
+    /* LEFT PANEL (info + live controls) */
+
+    .panel-left {
+      background: radial-gradient(circle at top left, #0b1120, #020617);
+      border-right: 1px solid rgba(15, 23, 42, 0.95);
+      padding: 1.7rem 1.6rem;
       display: flex;
-      flex-wrap: wrap;
-      gap: .5rem;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .brand-row {
+      display: flex;
       align-items: center;
-      margin-bottom:1.5rem;
+      justify-content: space-between;
+      gap: 0.9rem;
     }
-    .controls > * {
+
+    .brand-main {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+      background: #020617;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      color: var(--text-muted);
+    }
+
+    .brand-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.35);
+    }
+
+    h1.dashboard-title {
+      font-size: 1.4rem;
+      margin: 0;
+    }
+
+    .brand-subtitle {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .brand-meta {
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .brand-meta .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+    }
+
+    .brand-meta .tag span {
+      font-size: 0.75rem;
+    }
+
+    /* Quick stats row */
+
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.7rem;
+    }
+
+    .chip {
+      padding: 0.7rem 0.75rem;
+      border-radius: 0.75rem;
+      background: var(--bg-chip);
+      border: 1px solid rgba(30, 64, 175, 0.7);
+      font-size: 0.78rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .chip label {
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .chip strong {
+      font-size: 0.95rem;
+    }
+
+    .chip span.sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .chip-accent {
+      border-color: rgba(34, 197, 94, 0.6);
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .chip-danger {
+      border-color: rgba(239, 68, 68, 0.7);
+      background: rgba(24, 24, 27, 0.9);
+    }
+
+    /* Mode + filters */
+
+    .mode-block {
+      padding: 0.9rem 0.95rem;
+      border-radius: 0.9rem;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .mode-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .mode-header span.label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .mode-header span.badge {
+      background: rgba(23, 37, 84, 0.9);
+      border-radius: 999px;
+      font-size: 0.72rem;
+      padding: 0.25rem 0.55rem;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.55rem;
+      margin-top: 0.65rem;
+    }
+
+    select,
+    input[type="date"],
+    input[type="datetime-local"] {
+      background: #020617 !important;
+      color: var(--text-main) !important;
+      border-radius: 0.6rem;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      font-size: 0.85rem;
+      padding-inline: 0.75rem;
+    }
+
+    select:focus,
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.5);
+    }
+
+    .mode-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-apply-main {
+      flex: 1.4;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      border: none;
+      padding: 0.45rem 0.9rem;
+      background: var(--accent-soft);
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      transition: all 0.16s ease-out;
+    }
+
+    .btn-apply-main:hover {
+      background: rgba(22, 163, 74, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .secondary-links {
       flex: 1;
-      min-width: 120px;
+      display: flex;
+      gap: 0.4rem;
+      justify-content: flex-end;
+      flex-wrap: wrap;
     }
-    input, select {
-      background: #fff !important;
-      color: #000 !important;
-      border-radius: .25rem;
-      border: 1px solid #444;
+
+    .secondary-links a {
+      flex: 1;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      padding: 0.4rem 0.7rem;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      text-decoration: none;
+      color: var(--text-main) !important;
+      background: #020617;
+      white-space: nowrap;
     }
-    .btn, button, a.btn {
-      color: #fff !important;
+
+    .secondary-links a:hover {
+      background: rgba(15, 23, 42, 0.95);
     }
+
+    /* LIVE STATUS BLOCK */
+
+    #liveSection {
+      margin-top: 0.6rem;
+      padding: 0.85rem 0.95rem;
+      border-radius: 0.9rem;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .status-label {
+      font-size: 0.9rem;
+    }
+
+    #statusBadge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+    }
+
+    .status-numbers {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.55rem;
+      margin-top: 0.4rem;
+      font-size: 0.85rem;
+    }
+
+    .status-numbers .metric {
+      background: #020617;
+      border-radius: 0.7rem;
+      padding: 0.4rem 0.55rem;
+      border: 1px solid rgba(55, 65, 81, 0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .status-numbers label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .status-numbers span.value {
+      font-weight: 600;
+    }
+
+    .toggle-buttons {
+      margin-top: 0.7rem;
+      display: flex;
+      gap: 0.6rem;
+    }
+
+    #btn-on,
+    #btn-off {
+      flex: 1;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      padding: 0.45rem 0.75rem;
+      border: 1px solid transparent;
+      transition: all 0.16s ease-out;
+    }
+
+    #btn-on {
+      background: rgba(22, 163, 74, 0.9);
+      border-color: rgba(22, 163, 74, 1);
+    }
+
+    #btn-off {
+      background: rgba(248, 113, 113, 0.9);
+      border-color: rgba(239, 68, 68, 1);
+    }
+
+    #btn-on:hover {
+      background: rgba(34, 197, 94, 1);
+    }
+
+    #btn-off:hover {
+      background: rgba(248, 113, 113, 1);
+    }
+
+    /* RIGHT PANEL (charts + summaries) */
+
+    .panel-right {
+      padding: 1.7rem 1.6rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      background: radial-gradient(circle at top right, #020617, #020617 50%, #000 100%);
+    }
+
+    .summary-strip {
+      display: flex;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+    }
+
+    .summary-card {
+      flex: 1;
+      min-width: 0;
+      border-radius: 0.9rem;
+      padding: 0.8rem 0.9rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .summary-card h6 {
+      margin: 0;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .summary-card p {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .summary-card span.sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    #periodSummary,
+    #liveSummary {
+      margin-top: 0.3rem;
+    }
+
+    /* Charts */
+
+    .chart-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 0.4rem;
+    }
+
+    .chart-block {
+      border-radius: 0.95rem;
+      background: #020617;
+      border: 1px solid rgba(31, 41, 55, 0.95);
+      padding: 0.7rem 0.75rem 0.9rem;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.35rem;
+      gap: 0.5rem;
+    }
+
+    .chart-header h2 {
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .chart-header span {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
     .chart-wrapper {
       position: relative;
       width: 100%;
-      padding-top: 50%;
-      margin-bottom: 1rem;
+      padding-top: 40%;
     }
+
     .chart-wrapper canvas {
       position: absolute;
-      top: 0;
-      left: 0;
+      inset: 0;
       width: 100% !important;
       height: 100% !important;
     }
-    .badge {
-      font-size: .9rem;
-    }
-    /* Cat image styling */
+
+    /* Floating helper image */
+
     .cat-img {
       position: fixed;
-      bottom: 1rem;
       right: 1rem;
-      width: 120px;
+      bottom: 1rem;
+      width: 100px;
       height: auto;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.6);
-      z-index: 1000;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.95);
+      background: #020617;
+      padding: 4px;
+      opacity: 0.9;
+      z-index: 30;
+    }
+
+    /* Responsive */
+
+    @media (max-width: 991.98px) {
+      .dashboard-shell {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .panel-left {
+        border-right: none;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.95);
+      }
+    }
+
+    @media (max-width: 767.98px) {
+      body {
+        padding: 0.8rem;
+      }
+      .panel-left,
+      .panel-right {
+        padding-inline: 1.1rem;
+      }
+      .quick-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .status-numbers {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .secondary-links a {
+        flex: 1 1 100%;
+        text-align: center;
+      }
+      .cat-img {
+        width: 78px;
+      }
+    }
+
+    @media (max-width: 575.98px) {
+      .quick-stats {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .status-numbers {
+        grid-template-columns: minmax(0, 1fr);
+      }
     }
   </style>
 </head>
+
 <body>
-  <div class="card text-center">
-    <h1>⚡ Tuya Energy Dashboard</h1>
-    <div class="controls">
-      <select id="modeSelect" class="form-select">
-        <option value="live" selected>Live</option>
-        <option value="day">Load Day</option>
-        <option value="range">Load Range</option>
-      </select>
-      <input type="date" id="histDate" class="form-control"/>
-      <input type="datetime-local" id="startDateTime" class="form-control"/>
-      <input type="datetime-local" id="endDateTime" class="form-control"/>
-      <button id="btn-apply" class="btn btn-secondary">Apply</button>
-      <a href="/download" class="btn btn-outline-light">Download CSV</a>
-      <a href="/manual" class="btn btn-outline-info">How to Use</a>
-    </div>
-    <!-- LIVE READINGS -->
-    <div id="liveSection" class="mt-4">
-      <p class="reading">Socket is currently:
-        <span id="statusBadge" class="badge bg-secondary">--</span>
-      </p>
-      <p class="reading">Power: <strong><span id="powerVal">--</span></strong> W</p>
-      <p class="reading">Current: <strong><span id="currentVal">--</span></strong> A</p>
-      <p class="reading">Voltage: <strong><span id="voltageVal">--</span></strong> V</p>
-      <div class="mt-3">
-        <button id="btn-on" class="btn btn-success btn-lg me-2">Turn ON</button>
-        <button id="btn-off" class="btn btn-danger btn-lg">Turn OFF</button>
-      </div>
-    </div>
-    <!-- PERIOD SUMMARY (for Day/Range) -->
-    <div id="periodSummary" class="mt-4" style="display:none;">
-      <div class="d-flex justify-content-between my-4">
-        <div class="p-3 bg-dark rounded text-center flex-fill me-2 border border-secondary">
-          <h6 class="text-white">Total kWh</h6>
-          <p id="periodKwh" class="display-6 text-white">--</p>
+  <div class="dashboard-shell">
+
+    <!-- LEFT SIDE: mode, filters, live controls -->
+    <section class="panel-left">
+      <header class="brand-row">
+        <div class="brand-main">
+          <div class="brand-pill">
+            <span class="brand-dot"></span>
+            <span>Tuya Smart Socket</span>
+          </div>
+          <h1 class="dashboard-title">Energy Control Console</h1>
+          <p class="brand-subtitle">
+            Switch modes, tune time windows, and manage the socket in real time.
+          </p>
         </div>
-        <div class="p-3 bg-dark rounded text-center flex-fill border border-secondary">
-          <h6 class="text-white">Est. Cost (BDT)</h6>
-          <p id="periodCost" class="display-6 text-white">--</p>
+        <div class="brand-meta">
+          <div class="tag">
+            <span>BDT cost model</span>
+          </div>
+          <div style="margin-top:0.25rem;">Realtime + history</div>
         </div>
-      </div>
-    </div>
-    <!-- CHARTS -->
-    <div class="mt-4">
-      <h2 class="h5 text-white">Power (W)</h2>
-      <div class="chart-wrapper"><canvas id="powerChart"></canvas></div>
-      <h2 class="h5 text-white">Current (A)</h2>
-      <div class="chart-wrapper"><canvas id="currentChart"></canvas></div>
-      <h2 class="h5 text-white">Voltage (V)</h2>
-      <div class="chart-wrapper"><canvas id="voltageChart"></canvas></div>
-    </div>
-    <!-- LIVE SUMMARY (for Live) -->
-    <div id="liveSummary" class="mt-4">
-      <div class="d-flex justify-content-between my-4">
-        <div class="p-3 bg-dark rounded text-center flex-fill me-2 border border-secondary">
-          <h6 class="text-white">Today kWh</h6>
-          <p id="todayKwh" class="display-6 text-white">--</p>
+      </header>
+
+      <!-- Quick stats placeholders (updated by JS indirectly) -->
+      <div class="quick-stats">
+        <div class="chip chip-accent">
+          <label>Socket</label>
+          <strong><span id="status-mini">Unknown</span></strong>
+          <span class="sub">Current state</span>
         </div>
-        <div class="p-3 bg-dark rounded text-center flex-fill border border-secondary">
-          <h6 class="text-white">Cost (BDT)</h6>
-          <p id="todayCost" class="display-6 text-white">--</p>
+        <div class="chip">
+          <label>Today</label>
+          <strong><span id="chip-kwh">--</span></strong>
+          <span class="sub">Energy (kWh)</span>
+        </div>
+        <div class="chip chip-danger">
+          <label>Today Cost</label>
+          <strong><span id="chip-cost">--</span></strong>
+          <span class="sub">Approx. BDT</span>
         </div>
       </div>
-      <h2 class="h5 text-white">Last 24 h kWh by Hour</h2>
-      <div class="chart-wrapper"><canvas id="hourlyChart"></canvas></div>
-    </div>
+
+      <!-- Mode + filters -->
+      <div class="mode-block">
+        <div class="mode-header">
+          <span class="label">Viewing mode & time</span>
+          <span class="badge text-bg-dark">LIVE / DAY / RANGE</span>
+        </div>
+
+        <select id="modeSelect" class="form-select form-select-sm mb-1">
+          <option value="live" selected>Live (Realtime)</option>
+          <option value="day">Single Day History</option>
+          <option value="range">Custom Range</option>
+        </select>
+
+        <div class="input-row">
+          <input type="date" id="histDate" class="form-control form-control-sm"/>
+          <input type="datetime-local" id="startDateTime" class="form-control form-control-sm"/>
+          <input type="datetime-local" id="endDateTime" class="form-control form-control-sm"/>
+        </div>
+
+        <div class="mode-actions">
+          <button id="btn-apply" class="btn-apply-main">
+            <span>Apply selection</span>
+          </button>
+          <div class="secondary-links">
+            <a href="/download" class="btn btn-sm">CSV Export</a>
+            <a href="/manual" class="btn btn-sm">Help Guide</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIVE SECTION -->
+      <div id="liveSection">
+        <div class="status-row">
+          <div class="status-label">
+            Socket status:
+          </div>
+          <span id="statusBadge" class="badge bg-secondary">--</span>
+        </div>
+        <div class="status-numbers">
+          <div class="metric">
+            <label>Power</label>
+            <span class="value"><span id="powerVal">--</span> W</span>
+          </div>
+          <div class="metric">
+            <label>Current</label>
+            <span class="value"><span id="currentVal">--</span> A</span>
+          </div>
+          <div class="metric">
+            <label>Voltage</label>
+            <span class="value"><span id="voltageVal">--</span> V</span>
+          </div>
+        </div>
+        <div class="toggle-buttons">
+          <button id="btn-on" class="btn btn-success">Turn ON</button>
+          <button id="btn-off" class="btn btn-danger">Turn OFF</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT SIDE: summaries + charts -->
+    <section class="panel-right">
+
+      <!-- Period summary (for day + range) -->
+      <div id="periodSummary" style="display:none;">
+        <div class="summary-strip">
+          <div class="summary-card">
+            <h6>Total kWh</h6>
+            <p id="periodKwh">--</p>
+            <span class="sub">Energy in selected period</span>
+          </div>
+          <div class="summary-card">
+            <h6>Estimated Cost</h6>
+            <p id="periodCost">--</p>
+            <span class="sub">BDT, based on configured rate</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live summary (for live mode) -->
+      <div id="liveSummary">
+        <div class="summary-strip">
+          <div class="summary-card">
+            <h6>Today kWh</h6>
+            <p id="todayKwh">--</p>
+            <span class="sub">Energy since midnight</span>
+          </div>
+          <div class="summary-card">
+            <h6>Today Cost</h6>
+            <p id="todayCost">--</p>
+            <span class="sub">Estimated charge in BDT</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARTS -->
+      <div class="chart-group">
+        <div class="chart-block">
+          <div class="chart-header">
+            <h2>Power</h2>
+            <span>Watts (W)</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="powerChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-block">
+          <div class="chart-header">
+            <h2>Current</h2>
+            <span>Amps (A)</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="currentChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-block">
+          <div class="chart-header">
+            <h2>Voltage</h2>
+            <span>Volts (V)</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="voltageChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-block">
+          <div class="chart-header">
+            <h2>Hourly Energy Pattern</h2>
+            <span>Last 24h (kWh)</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="hourlyChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <!-- Cat image -->
-  <img src="{{ url_for('static', filename='cat.png') }}" alt="Cat" class="cat-img"/>
+  <!-- Floating helper image -->
+  <img src="{{ url_for('static', filename='cat.png') }}" alt="Helper" class="cat-img"/>
 
   <script>
+    // ---- INITIAL DATE VALUES ----
     const today = new Date().toISOString().slice(0,10);
     const nowHM = new Date().toISOString().slice(11,16);
-    document.getElementById('histDate').value      = today;
-    document.getElementById('startDateTime').value = `${today}T00:00`;
-    document.getElementById('startDateTime').max   = `${today}T23:59`;
-    document.getElementById('endDateTime').value   = `${today}T${nowHM}`;
-    document.getElementById('endDateTime').max     = `${today}T23:59`;
 
-    const mode = document.getElementById('modeSelect');
-    const day  = document.getElementById('histDate');
-    const sIn  = document.getElementById('startDateTime');
-    const eIn  = document.getElementById('endDateTime');
+    const histDateEl = document.getElementById('histDate');
+    const startEl    = document.getElementById('startDateTime');
+    const endEl      = document.getElementById('endDateTime');
 
-    function toggle() {
+    histDateEl.value      = today;
+    startEl.value         = `${today}T00:00`;
+    startEl.max           = `${today}T23:59`;
+    endEl.value           = `${today}T${nowHM}`;
+    endEl.max             = `${today}T23:59`;
+
+    const modeSelect = document.getElementById('modeSelect');
+
+    function toggleModeVisibility() {
       const liveSec = document.getElementById('liveSection');
       const liveSum = document.getElementById('liveSummary');
-      const perSum  = document.getElementById('periodSummary');
+      const periodSum = document.getElementById('periodSummary');
 
-      if (mode.value === 'live') {
-        day.style.display = sIn.style.display = eIn.style.display = 'none';
-        liveSec.style.display = liveSum.style.display = '';
-        perSum.style.display = 'none';
+      if (modeSelect.value === 'live') {
+        histDateEl.style.display = 'none';
+        startEl.style.display    = 'none';
+        endEl.style.display      = 'none';
+
+        liveSec.style.display  = '';
+        liveSum.style.display  = '';
+        periodSum.style.display = 'none';
+      } else if (modeSelect.value === 'day') {
+        histDateEl.style.display = '';
+        startEl.style.display    = 'none';
+        endEl.style.display      = 'none';
+
+        liveSec.style.display   = 'none';
+        liveSum.style.display   = 'none';
+        periodSum.style.display = 'none';
       } else {
-        day.style.display  = mode.value==='day' ? '' : 'none';
-        sIn.style.display  = eIn.style.display = mode.value==='range'? '' : 'none';
-        liveSec.style.display = liveSum.style.display = 'none';
-        perSum.style.display = 'none';
+        // range
+        histDateEl.style.display = 'none';
+        startEl.style.display    = '';
+        endEl.style.display      = '';
+
+        liveSec.style.display   = 'none';
+        liveSum.style.display   = 'none';
+        periodSum.style.display = 'none';
       }
     }
-    mode.onchange = toggle;
-    toggle();
 
-    const makeLine = (ctx,label) => new Chart(ctx,{
-      type:'line',
-      data:{ labels:[], datasets:[{ label, data:[], borderWidth:2, tension:0.3, pointRadius:0 }]},
-      options:{ responsive:true, maintainAspectRatio:false,
-        scales:{ x:{ ticks:{ color:'#ccc' }}, y:{ ticks:{ color:'#ccc'}}},
-        plugins:{ legend:{ labels:{ color:'#ccc'}}}
-      }
-    });
+    modeSelect.onchange = toggleModeVisibility;
+    toggleModeVisibility();
 
-    const powerChart   = makeLine(document.getElementById('powerChart').getContext('2d'),'Power (W)');
-    const currentChart = makeLine(document.getElementById('currentChart').getContext('2d'),'Current (A)');
-    const voltageChart = makeLine(document.getElementById('voltageChart').getContext('2d'),'Voltage (V)');
-    const hourlyCtx    = document.getElementById('hourlyChart').getContext('2d');
-    let hourlyChart, liveInt;
+    // ---- CHART HELPERS ----
+    const makeLine = (ctx, label) =>
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label,
+            data: [],
+            borderWidth: 2,
+            tension: 0.35,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              ticks: { color: '#9ca3af', maxRotation: 0 },
+              grid: { color: 'rgba(55,65,81,0.5)' }
+            },
+            y: {
+              ticks: { color: '#9ca3af' },
+              grid: { color: 'rgba(55,65,81,0.5)' }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: { color: '#e5e7eb' }
+            }
+          }
+        }
+      });
 
-    async function fetchStatus(){
-      const s = await fetch('/status').then(r=>r.json());
+    const powerChart   = makeLine(document.getElementById('powerChart').getContext('2d'), 'Power (W)');
+    const currentChart = makeLine(document.getElementById('currentChart').getContext('2d'), 'Current (A)');
+    const voltageChart = makeLine(document.getElementById('voltageChart').getContext('2d'), 'Voltage (V)');
+
+    const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
+    let hourlyChart;
+    let liveInt;
+
+    // ---- LIVE STATUS & SUMMARY ----
+    async function fetchStatus() {
+      const s = await fetch('/status').then(r => r.json());
       const badge = document.getElementById('statusBadge');
-      badge.textContent = s.switch?'ON':'OFF';
-      badge.className   = 'badge ' + (s.switch?'bg-success':'bg-danger');
+
+      badge.textContent = s.switch ? 'ON' : 'OFF';
+      badge.className   = 'badge ' + (s.switch ? 'bg-success' : 'bg-danger');
+
       document.getElementById('powerVal').textContent   = s.power.toFixed(1);
       document.getElementById('currentVal').textContent = s.current.toFixed(3);
       document.getElementById('voltageVal').textContent = s.voltage.toFixed(1);
-      const t = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-      [[powerChart,s.power],[currentChart,s.current],[voltageChart,s.voltage]]
-        .forEach(([ch,v])=>{
-          ch.data.labels.push(t);
-          ch.data.datasets[0].data.push(v);
-          if(ch.data.labels.length>60){
-            ch.data.labels.shift();
-            ch.data.datasets[0].data.shift();
-          }
-          ch.update();
-        });
+
+      // mini chips
+      document.getElementById('status-mini').textContent = s.switch ? 'ON' : 'OFF';
+
+      const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      [[powerChart, s.power], [currentChart, s.current], [voltageChart, s.voltage]].forEach(([ch, v]) => {
+        ch.data.labels.push(t);
+        ch.data.datasets[0].data.push(v);
+
+        if (ch.data.labels.length > 60) {
+          ch.data.labels.shift();
+          ch.data.datasets[0].data.shift();
+        }
+        ch.update();
+      });
     }
 
-    async function loadSummary(){
-      const d = await fetch('/summary').then(r=>r.json());
-      document.getElementById('todayKwh').textContent  = d.kwh + ' kWh';
-      document.getElementById('todayCost').textContent = '৳ ' + d.cost;
-      if(hourlyChart) hourlyChart.destroy();
-      hourlyChart = new Chart(hourlyCtx,{
-        type:'bar',
-        data:{ labels:d.trend.map(x=>x.hour+':00'), datasets:[{ data:d.trend.map(x=>x.kwh), borderWidth:1 }]},
-        options:{ responsive:true, maintainAspectRatio:false,
-          scales:{ x:{ ticks:{ color:'#ccc'}}, y:{ beginAtZero:true, ticks:{ color:'#ccc'}}},
-          plugins:{ legend:{ display:false}}
+    async function loadSummary() {
+      const d = await fetch('/summary').then(r => r.json());
+      const kwhText  = d.kwh + ' kWh';
+      const costText = '৳ ' + d.cost;
+
+      document.getElementById('todayKwh').textContent  = kwhText;
+      document.getElementById('todayCost').textContent = costText;
+
+      // also reflect on left chips
+      document.getElementById('chip-kwh').textContent  = kwhText;
+      document.getElementById('chip-cost').textContent = costText;
+
+      if (hourlyChart) hourlyChart.destroy();
+      hourlyChart = new Chart(hourlyCtx, {
+        type: 'bar',
+        data: {
+          labels: d.trend.map(x => x.hour + ':00'),
+          datasets: [{
+            data: d.trend.map(x => x.kwh),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              ticks: { color: '#9ca3af' },
+              grid: { color: 'rgba(55,65,81,0.4)' }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: '#9ca3af' },
+              grid: { color: 'rgba(55,65,81,0.4)' }
+            }
+          },
+          plugins: {
+            legend: { display: false }
+          }
         }
       });
     }
 
-    async function plot(rows){
-      [powerChart,currentChart,voltageChart].forEach(ch=>{
-        ch.data.labels=[]; ch.data.datasets[0].data=[];
+    // ---- HISTORY PLOTTING ----
+    async function plot(rows) {
+      [powerChart, currentChart, voltageChart].forEach(ch => {
+        ch.data.labels = [];
+        ch.data.datasets[0].data = [];
       });
-      rows.forEach(r=>{
-        const t = r.ts.substr(11,5);
-        powerChart.data.labels.push(t);   powerChart.data.datasets[0].data.push(r.power);
-        currentChart.data.labels.push(t); currentChart.data.datasets[0].data.push(r.current);
-        voltageChart.data.labels.push(t); voltageChart.data.datasets[0].data.push(r.voltage);
+
+      rows.forEach(r => {
+        const t = r.ts.substr(11, 5);
+        powerChart.data.labels.push(t);
+        currentChart.data.labels.push(t);
+        voltageChart.data.labels.push(t);
+
+        powerChart.data.datasets[0].data.push(r.power);
+        currentChart.data.datasets[0].data.push(r.current);
+        voltageChart.data.datasets[0].data.push(r.voltage);
       });
-      powerChart.update(); currentChart.update(); voltageChart.update();
+
+      powerChart.update();
+      currentChart.update();
+      voltageChart.update();
     }
 
-    document.getElementById('btn-apply').onclick = async ()=>{
+    // ---- APPLY BUTTON ----
+    document.getElementById('btn-apply').onclick = async () => {
       clearInterval(liveInt);
       document.getElementById('periodSummary').style.display = 'none';
-      document.getElementById('liveSummary').style.display = 'none';
+      document.getElementById('liveSummary').style.display   = 'none';
 
-      if(mode.value==='live'){
-        toggle();
+      if (modeSelect.value === 'live') {
+        toggleModeVisibility();
         await fetchStatus();
-        liveInt = setInterval(fetchStatus,60000);
+        liveInt = setInterval(fetchStatus, 60000);
         await loadSummary();
-        toggle();
+        toggleModeVisibility();
       }
-      else if(mode.value==='day'){
-        toggle();
-        const rows = await fetch(`/history?date=${day.value}`).then(r=>r.json());
-        plot(rows);
-        const ps = await fetch(`/summary?date=${day.value}`).then(r=>r.json());
-        document.getElementById('periodKwh').textContent  = ps.kwh + ' kWh';
-        document.getElementById('periodCost').textContent = '৳ ' + ps.cost;
+      else if (modeSelect.value === 'day') {
+        toggleModeVisibility();
+        const rows = await fetch(`/history?date=${histDateEl.value}`).then(r => r.json());
+        await plot(rows);
+
+        const ps = await fetch(`/summary?date=${histDateEl.value}`).then(r => r.json());
+        const kwhLabel  = ps.kwh + ' kWh';
+        const costLabel = '৳ ' + ps.cost;
+
+        document.getElementById('periodKwh').textContent  = kwhLabel;
+        document.getElementById('periodCost').textContent = costLabel;
+
         document.getElementById('periodSummary').style.display = '';
       }
       else {
-        toggle();
-        const start = `${sIn.value}:00`, end = `${eIn.value}:00`;
-        const rows = await fetch(`/history?start=${start}&end=${end}`).then(r=>r.json());
-        if(!rows.length) return alert('No data in that range');
-        plot(rows);
-        const ps = await fetch(`/summary?start=${start}&end=${end}`).then(r=>r.json());
-        document.getElementById('periodKwh').textContent  = ps.kwh + ' kWh';
-        document.getElementById('periodCost').textContent = '৳ ' + ps.cost;
+        // range
+        toggleModeVisibility();
+        const start = `${startEl.value}:00`;
+        const end   = `${endEl.value}:00`;
+
+        const rows = await fetch(`/history?start=${start}&end=${end}`).then(r => r.json());
+        if (!rows.length) {
+          alert('No data in that range');
+          return;
+        }
+        await plot(rows);
+
+        const ps = await fetch(`/summary?start=${start}&end=${end}`).then(r => r.json());
+        const kwhLabel  = ps.kwh + ' kWh';
+        const costLabel = '৳ ' + ps.cost;
+
+        document.getElementById('periodKwh').textContent  = kwhLabel;
+        document.getElementById('periodCost').textContent = costLabel;
+
         document.getElementById('periodSummary').style.display = '';
       }
     };
 
-    document.getElementById('btn-on').onclick  = ()=>fetch('/on').then(fetchStatus);
-    document.getElementById('btn-off').onclick = ()=>fetch('/off').then(fetchStatus);
+    // ---- ON/OFF BUTTONS ----
+    document.getElementById('btn-on').onclick  = () => fetch('/on').then(fetchStatus);
+    document.getElementById('btn-off').onclick = () => fetch('/off').then(fetchStatus);
 
+    // initial load
     document.getElementById('btn-apply').click();
   </script>
 </body>
