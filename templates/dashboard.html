@@ -539,6 +539,32 @@
         grid-template-columns: minmax(0, 1fr);
       }
     }
+        .building-nav {
+      margin-top: 0.6rem;
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .building-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      font-size: 0.82rem;
+      text-decoration: none;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.16s ease-out;
+    }
+
+    .building-pill:hover {
+      background: rgba(30, 64, 175, 0.65);
+      transform: translateY(-1px);
+    }
+
   </style>
 </head>
 
@@ -568,6 +594,11 @@
 
       <!-- Quick stats placeholders (updated by JS indirectly) -->
       <div class="quick-stats">
+        <div class="building-nav">
+        <a href="{{ url_for('building_fub') }}" class="building-pill">
+          🏢 FUB Building View
+        </a>
+      </div>
         <div class="chip chip-accent">
           <label>Socket</label>
           <strong><span id="status-mini">Unknown</span></strong>
