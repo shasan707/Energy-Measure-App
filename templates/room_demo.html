@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Room • {{ demo.building }} • Floor {{ demo.floor }} Room {{ demo.room }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg-page: #020617;
+      --bg-card: #020617;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: rgba(148, 163, 184, 0.4);
+      --danger: #ef4444;
+      --accent: #22c55e;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, #1e293b 0, #020617 55%, #000 100%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 1120px;
+      border-radius: 1.5rem;
+      background: #020617;
+      border: 1px solid rgba(15, 23, 42, 0.9);
+      box-shadow:
+        0 28px 80px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(15, 23, 42, 0.7);
+      padding: 1.7rem 1.5rem 1.6rem;
+    }
+
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .top-row h1 {
+      font-size: 1.3rem;
+      margin: 0;
+    }
+
+    .top-row p {
+      margin: 0.15rem 0 0 0;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .top-actions a {
+      text-decoration: none;
+      font-size: 0.8rem;
+      border-radius: 999px;
+      padding: 0.35rem 0.9rem;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      background: #020617;
+    }
+
+    .top-actions a:hover {
+      background: rgba(30, 64, 175, 0.65);
+    }
+
+    .demo-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.6fr);
+      gap: 1.1rem;
+    }
+
+    @media (max-width: 767.98px) {
+      .demo-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      body {
+        padding: 0.9rem;
+      }
+    }
+
+    .card-block {
+      border-radius: 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      padding: 1rem 1rem;
+    }
+
+    .card-block h2 {
+      font-size: 0.9rem;
+      margin: 0 0 0.2rem 0;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      background: rgba(127, 29, 29, 0.8);
+      border: 1px solid rgba(239, 68, 68, 0.9);
+      color: #fecaca;
+      margin-top: 0.3rem;
+    }
+
+    .status-chip span.dot {
+      font-size: 1rem;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.6rem;
+      margin-top: 0.9rem;
+    }
+
+    .metric {
+      border-radius: 0.8rem;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      padding: 0.45rem 0.6rem;
+      font-size: 0.85rem;
+    }
+
+    .metric label {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .metric span.value {
+      display: block;
+      margin-top: 0.15rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .summary-strip {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 0.9rem;
+      flex-wrap: wrap;
+    }
+
+    .summary-card {
+      flex: 1;
+      min-width: 0;
+      border-radius: 0.9rem;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      padding: 0.6rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .summary-card h6 {
+      margin: 0;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .summary-card p {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+
+    .summary-card span.sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.7rem;
+    }
+
+    .chart-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .chart-block {
+      border-radius: 0.95rem;
+      background: #020617;
+      border: 1px solid rgba(31, 41, 55, 0.95);
+      padding: 0.7rem 0.8rem 0.9rem;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .chart-header h3 {
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .chart-header span {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 38%;
+    }
+
+    .chart-wrapper canvas {
+      position: absolute;
+      inset: 0;
+      width: 100% !important;
+      height: 100% !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="top-row">
+      <div>
+        <h1>Socket • {{ demo.building }}</h1>
+        <p>Floor {{ demo.floor }} · Room {{ demo.room }} &mdash; dashboard (no live device)</p>
+      </div>
+      <div class="top-actions">
+        <a href="{{ url_for('building_fub') }}">← Back to FUB Building</a>
+      </div>
+    </div>
+
+    <div class="demo-layout">
+      <!-- LEFT: status + quick summary -->
+      <div class="card-block">
+        <h2>Socket status & metrics</h2>
+        <div class="status-chip">
+          <span class="dot">●</span>
+          <span>OFF</span>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric">
+            <label>Power</label>
+            <span class="value">{{ "%.1f"|format(demo.power) }} W</span>
+          </div>
+          <div class="metric">
+            <label>Current</label>
+            <span class="value">{{ "%.3f"|format(demo.current) }} A</span>
+          </div>
+          <div class="metric">
+            <label>Voltage</label>
+            <span class="value">{{ "%.1f"|format(demo.voltage) }} V</span>
+          </div>
+        </div>
+
+        <div class="summary-strip">
+          <div class="summary-card">
+            <h6>Today kWh</h6>
+            <p id="todayKwh">0.000 kWh</p>
+            <span class="sub">Energy since midnight (demo)</span>
+          </div>
+          <div class="summary-card">
+            <h6>Today Cost</h6>
+            <p id="todayCost">৳ 0.00</p>
+            <span class="sub">Estimated in BDT (demo)</span>
+          </div>
+        </div>
+
+        <div class="note">
+        All values and
+          charts are placeholders so you can design the layout without connecting
+          a real device.
+        </div>
+      </div>
+
+      <!-- RIGHT: charts -->
+      <div class="chart-group">
+        <div class="chart-block">
+          <div class="chart-header">
+            <h3>Power</h3>
+            <span>Watts (W)</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="powerChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-block">
+          <div class="chart-header">
+            <h3>Current</h3>
+            <span>Amps (A)</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="currentChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-block">
+          <div class="chart-header">
+            <h3>Voltage</h3>
+            <span>Volts (V)</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="voltageChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-block">
+          <div class="chart-header">
+            <h3>Hourly Energy Pattern</h3>
+            <span>Last 24h (kWh) &mdash; demo</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="hourlyChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // ------- DEMO DATA (zeros, placeholder) -------
+    const labels24 = Array.from({ length: 24 }, (_, i) =>
+      String(i).padStart(2, '0') + ':00'
+    );
+    const zeroData = new Array(24).fill(0);
+
+    const commonLineOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          ticks: { color: '#9ca3af', maxRotation: 0 },
+          grid: { color: 'rgba(55,65,81,0.5)' }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: '#9ca3af' },
+          grid: { color: 'rgba(55,65,81,0.5)' }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: { color: '#e5e7eb' }
+        }
+      }
+    };
+
+    function makeLineChart(ctx, label) {
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels24,
+          datasets: [{
+            label: label,
+            data: zeroData,
+            borderWidth: 2,
+            tension: 0.35,
+            pointRadius: 0
+          }]
+        },
+        options: commonLineOptions
+      });
+    }
+
+    // Power / Current / Voltage line charts
+    const powerChart   = makeLineChart(
+      document.getElementById('powerChart').getContext('2d'),
+      'Power (W)'
+    );
+    const currentChart = makeLineChart(
+      document.getElementById('currentChart').getContext('2d'),
+      'Current (A)'
+    );
+    const voltageChart = makeLineChart(
+      document.getElementById('voltageChart').getContext('2d'),
+      'Voltage (V)'
+    );
+
+    // Hourly bar chart (kWh)
+    const hourlyChart = new Chart(
+      document.getElementById('hourlyChart').getContext('2d'),
+      {
+        type: 'bar',
+        data: {
+          labels: labels24,
+          datasets: [{
+            data: zeroData,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              ticks: { color: '#9ca3af' },
+              grid: { color: 'rgba(55,65,81,0.4)' }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: '#9ca3af' },
+              grid: { color: 'rgba(55,65,81,0.4)' }
+            }
+          },
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      }
+    );
+
+    // If later you want, you can replace zeroData with real per-room data fetched via AJAX.
+  </script>
+</body>
+</html>
