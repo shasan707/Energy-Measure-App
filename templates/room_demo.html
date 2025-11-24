@@ -240,6 +240,24 @@
       width: 100% !important;
       height: 100% !important;
     }
+
+    .button-container {
+      margin-top: 1rem;
+    }
+
+    .button-container button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      background-color: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 1rem;
+      cursor: pointer;
+    }
+
+    .button-container button.off {
+      background-color: var(--danger);
+    }
   </style>
 </head>
 <body>
@@ -258,7 +276,7 @@
       <!-- LEFT: status + quick summary -->
       <div class="card-block">
         <h2>Socket status & metrics</h2>
-        <div class="status-chip">
+        <div class="status-chip" id="socketStatus">
           <span class="dot">●</span>
           <span>OFF</span>
         </div>
@@ -266,15 +284,15 @@
         <div class="metrics-grid">
           <div class="metric">
             <label>Power</label>
-            <span class="value">{{ "%.1f"|format(demo.power) }} W</span>
+            <span class="value" id="socketPower">0.0 W</span>
           </div>
           <div class="metric">
             <label>Current</label>
-            <span class="value">{{ "%.3f"|format(demo.current) }} A</span>
+            <span class="value" id="socketCurrent">0.000 A</span>
           </div>
           <div class="metric">
             <label>Voltage</label>
-            <span class="value">{{ "%.1f"|format(demo.voltage) }} V</span>
+            <span class="value" id="socketVoltage">0.0 V</span>
           </div>
         </div>
 
@@ -292,53 +310,20 @@
         </div>
 
         <div class="note">
-        All values and
-          charts are placeholders so you can design the layout without connecting
+          All values and charts are placeholders so you can design the layout without connecting
           a real device.
+        </div>
+
+        <!-- Buttons for turning On and Off -->
+        <div class="button-container">
+          <button id="onButton" onclick="toggleSocket('on')">Turn On</button>
+          <button id="offButton" class="off" onclick="toggleSocket('off')">Turn Off</button>
         </div>
       </div>
 
       <!-- RIGHT: charts -->
       <div class="chart-group">
-        <div class="chart-block">
-          <div class="chart-header">
-            <h3>Power</h3>
-            <span>Watts (W)</span>
-          </div>
-          <div class="chart-wrapper">
-            <canvas id="powerChart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-block">
-          <div class="chart-header">
-            <h3>Current</h3>
-            <span>Amps (A)</span>
-          </div>
-          <div class="chart-wrapper">
-            <canvas id="currentChart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-block">
-          <div class="chart-header">
-            <h3>Voltage</h3>
-            <span>Volts (V)</span>
-          </div>
-          <div class="chart-wrapper">
-            <canvas id="voltageChart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-block">
-          <div class="chart-header">
-            <h3>Hourly Energy Pattern</h3>
-            <span>Last 24h (kWh) &mdash; demo</span>
-          </div>
-          <div class="chart-wrapper">
-            <canvas id="hourlyChart"></canvas>
-          </div>
-        </div>
+        <!-- Charts go here -->
       </div>
     </div>
   </div>
@@ -437,7 +422,29 @@
       }
     );
 
-    // If later you want, you can replace zeroData with real per-room data fetched via AJAX.
+    // Toggle socket state (On/Off)
+    function toggleSocket(state) {
+      const statusChip = document.getElementById('socketStatus');
+      const socketPower = document.getElementById('socketPower');
+      const socketCurrent = document.getElementById('socketCurrent');
+      const socketVoltage = document.getElementById('socketVoltage');
+
+      if (state === 'on') {
+        statusChip.innerHTML = '<span class="dot">●</span><span>ON</span>';
+        socketPower.textContent = '50.0 W'; // Example value when On
+        socketCurrent.textContent = '0.200 A'; // Example value when On
+        socketVoltage.textContent = '220.0 V'; // Example value when On
+        document.getElementById('onButton').disabled = true;
+        document.getElementById('offButton').disabled = false;
+      } else {
+        statusChip.innerHTML = '<span class="dot">●</span><span>OFF</span>';
+        socketPower.textContent = '0.0 W'; // Example value when Off
+        socketCurrent.textContent = '0.000 A'; // Example value when Off
+        socketVoltage.textContent = '0.0 V'; // Example value when Off
+        document.getElementById('onButton').disabled = false;
+        document.getElementById('offButton').disabled = true;
+      }
+    }
   </script>
 </body>
 </html>
