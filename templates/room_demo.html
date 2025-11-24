@@ -240,24 +240,6 @@
       width: 100% !important;
       height: 100% !important;
     }
-
-    .button-container {
-      margin-top: 1rem;
-    }
-
-    .button-container button {
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      background-color: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 1rem;
-      cursor: pointer;
-    }
-
-    .button-container button.off {
-      background-color: var(--danger);
-    }
   </style>
 </head>
 <body>
@@ -313,17 +295,49 @@
           All values and charts are placeholders so you can design the layout without connecting
           a real device.
         </div>
-
-        <!-- Buttons for turning On and Off -->
-        <div class="button-container">
-          <button id="onButton" onclick="toggleSocket('on')">Turn On</button>
-          <button id="offButton" class="off" onclick="toggleSocket('off')">Turn Off</button>
-        </div>
       </div>
 
       <!-- RIGHT: charts -->
       <div class="chart-group">
-        <!-- Charts go here -->
+        <div class="chart-block">
+          <div class="chart-header">
+            <h3>Power</h3>
+            <span>Watts (W)</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="powerChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-block">
+          <div class="chart-header">
+            <h3>Current</h3>
+            <span>Amps (A)</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="currentChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-block">
+          <div class="chart-header">
+            <h3>Voltage</h3>
+            <span>Volts (V)</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="voltageChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-block">
+          <div class="chart-header">
+            <h3>Hourly Energy Pattern</h3>
+            <span>Last 24h (kWh) &mdash; demo</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="hourlyChart"></canvas>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -331,11 +345,16 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // ------- DEMO DATA (zeros, placeholder) -------
+    // ------- DEMO DATA (placeholder data) -------
     const labels24 = Array.from({ length: 24 }, (_, i) =>
       String(i).padStart(2, '0') + ':00'
     );
+
+    // Power, Current, Voltage (example static values)
     const zeroData = new Array(24).fill(0);
+    const powerData = new Array(24).fill(50); // Example power data (50W)
+    const currentData = new Array(24).fill(0.2); // Example current data (0.2A)
+    const voltageData = new Array(24).fill(220); // Example voltage data (220V)
 
     const commonLineOptions = {
       responsive: true,
@@ -358,14 +377,14 @@
       }
     };
 
-    function makeLineChart(ctx, label) {
+    function makeLineChart(ctx, label, data) {
       return new Chart(ctx, {
         type: 'line',
         data: {
           labels: labels24,
           datasets: [{
             label: label,
-            data: zeroData,
+            data: data,
             borderWidth: 2,
             tension: 0.35,
             pointRadius: 0
@@ -378,18 +397,21 @@
     // Power / Current / Voltage line charts
     const powerChart   = makeLineChart(
       document.getElementById('powerChart').getContext('2d'),
-      'Power (W)'
+      'Power (W)',
+      powerData
     );
     const currentChart = makeLineChart(
       document.getElementById('currentChart').getContext('2d'),
-      'Current (A)'
+      'Current (A)',
+      currentData
     );
     const voltageChart = makeLineChart(
       document.getElementById('voltageChart').getContext('2d'),
-      'Voltage (V)'
+      'Voltage (V)',
+      voltageData
     );
 
-    // Hourly bar chart (kWh)
+    // Hourly energy bar chart (kWh)
     const hourlyChart = new Chart(
       document.getElementById('hourlyChart').getContext('2d'),
       {
@@ -421,30 +443,6 @@
         }
       }
     );
-
-    // Toggle socket state (On/Off)
-    function toggleSocket(state) {
-      const statusChip = document.getElementById('socketStatus');
-      const socketPower = document.getElementById('socketPower');
-      const socketCurrent = document.getElementById('socketCurrent');
-      const socketVoltage = document.getElementById('socketVoltage');
-
-      if (state === 'on') {
-        statusChip.innerHTML = '<span class="dot">●</span><span>ON</span>';
-        socketPower.textContent = '50.0 W'; // Example value when On
-        socketCurrent.textContent = '0.200 A'; // Example value when On
-        socketVoltage.textContent = '220.0 V'; // Example value when On
-        document.getElementById('onButton').disabled = true;
-        document.getElementById('offButton').disabled = false;
-      } else {
-        statusChip.innerHTML = '<span class="dot">●</span><span>OFF</span>';
-        socketPower.textContent = '0.0 W'; // Example value when Off
-        socketCurrent.textContent = '0.000 A'; // Example value when Off
-        socketVoltage.textContent = '0.0 V'; // Example value when Off
-        document.getElementById('onButton').disabled = false;
-        document.getElementById('offButton').disabled = true;
-      }
-    }
   </script>
 </body>
 </html>
